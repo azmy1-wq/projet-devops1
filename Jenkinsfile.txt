@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+
+    tools {
+        maven "Maven"
+        jdk "JDK-17"
+    }
+
+    environment {
+        IMAGE_NAME = "wajd376/mon-app"
+        IMAGE_TAG  = "${env.BUILD_NUMBER}" // tag unique pour chaque build
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Wajdbenameur1/wajd_benameur_4INFINI2.git',
+                    credentialsId: 'github-credentials-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'
+            }
+        }
+
+        stage('Build Maven') {
+            steps {
+                sh "mvn clean package -DskipTests"
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+
+        stage('Docker: Build Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+                }
+            }
+        }
+
+        stage('Docker: Push to Docker Hub') {
+            steps {
+                script {
+                    // Utilisation sécurisée du credential Jenkins pour Docker
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        dockerImage.push()         // push avec numéro de build
+                    }
+                }
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                // Supprime les images locales pour libérer de l'espace
+                sh "docker image rm ${IMAGE_NAME}:${IMAGE_TAG} || true"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Build succeeded!"
+        }
+        failure {
+            echo "Build failed!"
+        }
+    }
+}
