@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = "wajd376/mon-app"
+        IMAGE_NAME = "azmyy/alpine"
         IMAGE_TAG  = "${env.BUILD_NUMBER}" // tag unique pour chaque build
     }
 
