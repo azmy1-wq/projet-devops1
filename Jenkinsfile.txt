@@ -15,8 +15,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/Wajdbenameur1/wajd_benameur_4INFINI2.git',
-                    credentialsId: 'github-credentials-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'
+                    url: 'https://github.com/azmy1-wq/projet-devops1.git',
+                    credentialsId: 'github-token-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'
             }
         }
 
